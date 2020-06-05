@@ -20,25 +20,22 @@ import './index.css';
       />
       );
     }
-  
+
+    renderSquares(n){
+        let squares = []
+        for (let i = n; i < n + 3; i++) {
+            squares.push(this.renderSquare(i));
+        }
+        return <div className="board-row">{squares}</div>;
+    }
+
+
     render() {
       return (
         <div>
-          <div className="board-row">
-            {this.renderSquare(0)}
-            {this.renderSquare(1)}
-            {this.renderSquare(2)}
-          </div>
-          <div className="board-row">
-            {this.renderSquare(3)}
-            {this.renderSquare(4)}
-            {this.renderSquare(5)}
-          </div>
-          <div className="board-row">
-            {this.renderSquare(6)}
-            {this.renderSquare(7)}
-            {this.renderSquare(8)}
-          </div>
+            {this.renderSquares(0)}
+            {this.renderSquares(3)}
+            {this.renderSquares(9)}
         </div>
       );
     }
@@ -59,6 +56,18 @@ import './index.css';
 
       
     handleClick(i){
+        const location = [
+            [1, 1],
+            [1, 2],
+            [1, 3],
+            [2, 1],
+            [2, 2],
+            [2, 3],
+            [3, 1],
+            [3, 2],
+            [3, 3],
+        ];
+
         const history = this.state.history.slice(0,
     this.state.stepNumber + 1);
         const current = history[history.length - 1];
@@ -70,7 +79,8 @@ import './index.css';
         squares[i] = this.state.xIsNext ? 'x' : 'o';
         this.setState({
             history: history.concat([{
-                squares: squares
+                squares: squares,
+                location: location[i]
             }]),
             stepNumber: history.length,
             xIsNext: !this.state.xIsNext,
@@ -89,13 +99,15 @@ import './index.css';
         const current = history[this.state.stepNumber];
         const winner = calculateWinner(current.squares);
 
-        const moves = history.map((step,move) => {
-            const desc = move ?
-            'Go to move #' + move :
-            'Go to game start';
+        const moves = history.map((step, move) => {
+            const desc = move 
+            ? 'Go to move #' + move + ' at: ' + history[move].location
+            : 'Go to game start';
             return (
                 <li key={move}>
-                    <button onClick = {() => this.jumpTo(move)}>{desc}</button>
+                    <button onClick = {() => this.jumpTo(move)}>
+                        {move === this.state.stepNumber ? <b>{desc}</b> : desc}
+                    </button>
                 </li>
             );
         });
