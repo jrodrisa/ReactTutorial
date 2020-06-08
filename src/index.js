@@ -5,7 +5,7 @@ import './index.css';
 
   function Square(props) {
     return (
-        <button className="square" onClick={()=> props.onClick()}>
+        <button className= {props.className} onClick={()=> props.onClick()}>
             {props.value}
         </button>
     );
@@ -14,8 +14,10 @@ import './index.css';
   class Board extends React.Component {
     renderSquare(i) {
       return (
-      <Square 
-        value={this.props.squares[i]} 
+      <Square
+        key = {"square" + i}
+        className = {this.props.winner ? (this.props.winner.position.includes(i) ? "winner" : "square") : "square"}
+        value={this.props.squares[i]}
         onClick ={() => this.props.onClick(i)}
       />
       );
@@ -35,7 +37,7 @@ import './index.css';
         <div>
             {this.renderSquares(0)}
             {this.renderSquares(3)}
-            {this.renderSquares(9)}
+            {this.renderSquares(6)}
         </div>
       );
     }
@@ -51,6 +53,7 @@ import './index.css';
             }],
             stepNumber: 0,
             xIsNext: true,
+            isDescending: true,
         }
     }
 
@@ -94,6 +97,12 @@ import './index.css';
         });
     }
 
+    toggleOrder(){
+        this.setState({
+            isDescending: !this.state.isDescending
+        });    
+    }
+
     render() {
         const history = this.state.history;
         const current = history[this.state.stepNumber];
@@ -114,7 +123,9 @@ import './index.css';
 
         let status;
         if(winner){
-            status = 'Winner: ' + winner;
+            status = 'Winner: ' + winner.winner;
+        } else if(this.state.stepNumber === 9){
+            status = 'It\'s a draw!';
         } else {
             status = 'Next Player: ' + (this.state.xIsNext ? 'X' : 'O');
         }
@@ -124,12 +135,17 @@ import './index.css';
           <div className="game-board">
             <Board 
                 squares = {current.squares}
+                winner = {winner}
                 onClick={(i) => this.handleClick(i)}
             />
           </div>
           <div className="game-info">
             <div>{status}</div>
-            <ol>{moves}</ol>
+            <button onClick={() => this.toggleOrder()}>
+                Sort by: {this.state.isDescending ? "Descending" : "Asending"}
+            </button>
+            <ol>{this.state.isDescending ? moves : moves.reverse()}</ol>
+                       
           </div>
         </div>
       );
@@ -157,7 +173,7 @@ import './index.css';
     for (let i = 0; i < lines.length; i++) {
         const [a, b, c] = lines[i];
         if (squares[a] && squares[a] === squares[b] && squares[a] === squares[c]){
-            return squares[a];
+            return {winner: squares[a], position: lines[i]};
         }
     }
     return null;
